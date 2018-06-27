@@ -1,12 +1,10 @@
 var Editor = {
-    line: 1,
     elestr: '',
     $cont: null,
     init: function (elestr) {
         this.elestr = elestr;
         this.$cont = $(this.elestr + ' .cmb_editor_panel')
         this.$numwp = $(this.elestr + ' .cmb_gutter')
-        this.showLayer();
         this.addHandler();
     },
     addJson: function (json) {
@@ -16,6 +14,7 @@ var Editor = {
             var html = this.getDomFromJson(json);
             this.$cont.html(html);
             this.matchHeight();
+            this.setNumWp();
         }
     },
     getDomFromJson: function (json) {
@@ -87,48 +86,61 @@ var Editor = {
             }
             str = str.replace(a[0], '');
             console.log(a[0])
-            domstr += '<div style="margin-bottom:5px; margin-left: ' + left + 'px">' + inStr + '</div>';
+            domstr += '<div class="cmb_edit_div" style=" margin-left: ' + left + 'px">' + inStr + '</div>';
         }
         return domstr;
+    },
+    getJsonFromDom: function($divs){
+        var str = '';
+        var reg = /<(\w+).+?>(.+?)<\/\1>/;
+        for(var i = 0, len = $divs.length; i < len; i++){
+            var spans = $divs.children('span');
+            for(var j = 0, l = spans.length; j < l; j++){
+                str += spans[i].innerHTML;
+            }
+        }
+        return str;
     },
     addHandler: function () {
         var $cont = this.$cont;
         var _self = this;
-        $cont.on('keydown', function (e) {
-            console.log('keydown')
-            // var v = $cont.val();
-            // if (e.keyCode == 9 || e.witch == 9) {
-            //     e.preventDefault();
-            //     var str = $cont.val() + '  ';
-            //     $cont.val(str);
-            // } else if (e.keyCode == 13 || e.witch == 13) {
-            //     v = v + '\n';
-            // }
-            // _self.doWhenNotEqual(v)
+        this.$cont.on('keydown', function (e) {
+            _self.doWhenNotEqual()
         })
-        $cont.on('keyup', function (e) {
-            console.log('keyup')
-            // if (e.keyCode == 9 || e.witch == 9) {
-            //     e.preventDefault();
-            // }
-            // _self.doWhenNotEqual($cont.val())
+        this.$cont.on('keyup', function (e) {
+            _self.isWrong(e)
         })
     },
-    doWhenNotEqual: function (v) {
-        var app = v.split('\n');
-        if (app.length != this.line && app.length != 0) {
-            this.line = app.length;
-            this.showLayer();
+    pasteFn: function(e){
+        var $divs = this.$cont.children('div');
+        if($divs.length == 0){
+            var json = this.$cont.html();
+            this.addJson(json);
+        }else{
+            var json = this.getJsonFromDom($divs);
+            this.addJson(json);
+        }
+    },
+    isWrong: function(e){
+        console.log('d')
+        
+    },
+    doWhenNotEqual: function () {
+        var len1 = this.$cont.children('div').length;
+        var len2 = this.$numwp.children('div').length;
+        if (len1 != len2) {
+            this.setNumWp();
             this.matchHeight();
         }
     },
-    showLayer: function () {
-        var $numwp = $(this.elestr + ' .cmb_layer')
+    setNumWp: function (len) {
+        len = len || this.$cont.children('div').length;
+        console.log(len)
         var str = '';
-        for (var i = 0; i < this.line; i++) {
+        for (var i = 0; i < len; i++) {
             str += '<div class="cmb_gutter-cell">' + (i + 1) + '</div>'
         }
-        $numwp.html(str);
+        this.$numwp.html(str);
     },
     matchHeight: function () {
         var eh = $(this.elestr).height();
