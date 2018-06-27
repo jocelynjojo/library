@@ -1,0 +1,72 @@
+
+/* 用到 的 css */
+.cmb_editor {
+    position: relative;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    font-family: 'Arial','Monaco', 'Menlo', 'Ubuntu Mono', 'Droid Sans Mono', 'Consolas', monospace;
+    font-size: 12px;
+    width: 100%;
+    height: 500px;
+    border: 1px solid black;
+    overflow-y: auto;
+    padding: 0;
+}
+.cmb_editor_cont{
+    width: 100%;
+    display: flex;
+    display: inline-flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+.cmb_gutter {
+    position: relative;
+    min-height: 500px;
+    width: auto;
+    cursor: default;
+    z-index: 4;
+    background: #f2f2f2;
+    width: 35px;
+    text-align: right;
+    pointer-events: auto;
+    z-index: 1;
+    white-space: nowrap;
+}
+
+.cmb_gutter-cell {
+    height: 16px;
+    line-height: 16px;
+    padding-right: 6px;
+    background-repeat: no-repeat;
+}
+
+.cmb_editor_panel {
+    flex-grow: 1;
+    opacity: 1;
+    background: #f2f2f2;
+    appearance: none;
+    -moz-appearance: none;
+    border: none;
+    resize: none;
+    outline: none;
+    overflow-y: hidden;
+    font-size: 12px;
+    line-height: 16px;
+    padding: 0;
+    color: #333;
+    margin-left: 6px;
+    font-family: Menlo, Monaco, Consolas, "Courier New", monospace, Arial, Helvetica, sans-serif;
+}
+.cmb_editor_panel .name{
+    color: #f00;
+}
+.cmb_editor_panel .value{
+    color: #a31515;
+}
+.cmb_editor_panel .punctuation{
+    color: #000;
+    padding-right: 0.5em;
+}
+.cmb_editor_panel .brackets{
+    color: #000;
+}

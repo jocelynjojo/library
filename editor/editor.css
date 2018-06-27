@@ -1,0 +1,74 @@
+
+/* 用到 的 css */
+.cmb_editor {
+    position: relative;
+    overflow: hidden;
+    font-family: 'Arial','Monaco', 'Menlo', 'Ubuntu Mono', 'Droid Sans Mono', 'Consolas', monospace;
+    font-size: 12px;
+    width: 100%;
+    height: 500px;
+    border: 1px solid black;
+    overflow-y: auto;
+}
+.cmb_gutter {
+    position: relative;
+    overflow: hidden;
+    min-height: 100%;
+    width: auto;
+    cursor: default;
+    z-index: 4;
+    background: #f2f2f2;
+    width: 35px;
+}
+
+.cmb_gutter-cell {
+    height: 16px;
+    line-height: 16px;
+    padding-right: 6px;
+    background-repeat: no-repeat;
+}
+
+.cmb_gutter .cmb_layer {
+    position: relative;
+    width: auto;
+    text-align: right;
+    pointer-events: auto;
+    z-index: 1;
+    overflow: hidden;
+    white-space: nowrap;
+    height: 100%;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+}
+.cmb_scroller {
+    position: absolute;
+    overflow: hidden;
+    height: 100%; 
+    left: 39px; 
+    top: 0;
+    right: 0; 
+    overflow-x: hidden;
+}
+
+.cmb_scroller > textarea {
+    position: absolute;
+    z-index: 1;
+    height: 100%;
+    left: 0;
+    top: 0;
+    width: 100%;
+    right: 0;
+    opacity: 1;
+    background: #f2f2f2;
+    appearance: none;
+    -moz-appearance: none;
+    border: none;
+    resize: none;
+    outline: none;
+    overflow-y: hidden;
+    font-size: 12px;
+    line-height: 16px;
+    padding: 0;
+    color: #333;
+}

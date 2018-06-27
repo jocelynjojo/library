@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="editor.css">
+</head>
+
+<body>
+    <div id="cmb_editor" class="cmb_editor">
+        <div class="cmb_gutter" style="display: block;">
+            <div class="cmb_layer"></div>
+        </div>
+        <div class="cmb_scroller" style="height: 2112px;">
+            <textarea wrap="off" class="cmb_editor_panel"></textarea>
+        </div>
+    </div>
+    <script src="jquery-1.10.1.min.js"></script>
+    <script src="editor.js"></script>
+    <script>
+        $(function () {
+            Editor.init('#cmb_editor');
+            Editor.addStr('<!DOCTYPE html>\n<html lang="zh-cn"> \n<head> \n<meta charset="utf-8" /> \n</head>\n</html>')
+        });
+    </script>
+</body>
+
+</html>
