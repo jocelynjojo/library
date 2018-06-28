@@ -225,6 +225,9 @@ Editor.prototype.getFirstLine = function () {
 Editor.prototype.setNumWp = function (line) {
     var len = this.$cont.children('div').length;
     var str = '', cls = '';
+    if(!/^\s*?<.+?>/.test(this.$cont.html()) && /<.+?>/.test(this.$cont.html())){
+        len++;
+    }
     for (var i = 0; i < len; i++) {
         cls = '';
         if (line != -1 && (i >= line || len == i + 1)) {
