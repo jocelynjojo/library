@@ -3,6 +3,7 @@ function Editor(elestr) {
     this.$cont = $(this.elestr + ' .cmb_editor_panel')
     this.$numwp = $(this.elestr + ' .cmb_gutter');
     this.addHandler();
+    this.setNumWp();
     this.setRegs();
     this.setRegs2();
 }
@@ -223,10 +224,15 @@ Editor.prototype.getFirstLine = function () {
 }
 
 Editor.prototype.setNumWp = function (line) {
+    if(line == undefined){
+        line = -1;
+    }
     var len = this.$cont.children('div').length;
     var str = '', cls = '';
     if(!/^\s*?<.+?>/.test(this.$cont.html()) && /<.+?>/.test(this.$cont.html())){
         len++;
+    }else if(len == 0){
+        len = 1;
     }
     for (var i = 0; i < len; i++) {
         cls = '';
