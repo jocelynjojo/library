@@ -38,7 +38,7 @@ Editor.prototype.setRegs2 = function () {
     regs.reg5 = /^(?:("\w+?"):)?(\{)/; //匹配 "name"{ 或者 {
     regs.reg6 = /^("\w+?"):("")(,?)/ //匹配后面跟着(,|\]|\})的 "name":"" 
     regs.reg7 = /^("\w+?"):(".*?[^\\]")(,?)/ //匹配后面跟着(,|\]|\})的 "name":"value" 其中通过[^\\]" 过滤掉 value 中的"
-    regs.reg8 = /^("\w+?"):(true|false|\d+?)(,?)/ //匹配后面跟着(,|\]|\})的 "name":value
+    regs.reg8 = /^("\w+?"):(true|false|\d+)(,?)/ //匹配后面跟着(,|\]|\})的 "name":value
     regs.reg9 = /^(\}),(\{)/ //匹配 },{
     regs.reg10 = /^(\]),(\[)/ //匹配 ],[
     regs.reg11 = /^(\}\])(,?)/; //匹配 }], 或者 }]
@@ -149,7 +149,7 @@ Editor.prototype.getDomFromJson = function (json) {
                         break;
                     case 9: case 10:
                         left = (arrlength - 1) * ml;
-                        inStr = '<span class="brackets">' + a[1] + '</span>' + '<span class="punctuation">:</span>' + '<span class="brackets">' + a[2] + '</span>';
+                        inStr = '<span class="brackets">' + a[1] + '</span>' + '<span class="punctuation">,</span>' + '<span class="brackets">' + a[2] + '</span>';
                         break;
                     case 13: case 11: case 12:
                         arrlength -= a[1].length
