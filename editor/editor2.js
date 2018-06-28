@@ -4,7 +4,8 @@ var Editor = {
     init: function (elestr) {
         this.elestr = elestr;
         this.$cont = $(this.elestr + ' .cmb_editor_panel')
-        this.$numwp = $(this.elestr + ' .cmb_gutter')
+        this.$numwp = $(this.elestr + ' .cmb_gutter');
+        this.$divarr = []; //最后一次调用getDomFromJson返回的domarr
         this.addHandler();
     },
     addJson: function (json) {
@@ -17,7 +18,7 @@ var Editor = {
             this.setNumWp();
         }
     },
-    getDomFromJson: function (json) {
+    getRegs: function(){
         var regs = {};
         regs.reg1 = /^(?:("\w+?"):)?(\{\},?)/; //匹配 "name":{} 或者 "name":{}, 或者{}
         regs.reg2 = /^(?:("\w+?"):)?(\[\],?)/; // 匹配 "name":[] 或者 "name":[],或者[]
@@ -32,6 +33,12 @@ var Editor = {
         regs.reg11 = /^(\}\])(,?)/; //匹配 }], 或者 }]
         regs.reg12 = /^(])(,?)/; // 匹配 ] 或者 ],
         regs.reg13 = /^(})(,?)/; // 匹配 } 或者 },
+        regs.reg14 = /^.+?(?=\{|\[|"|\}|\])/ // 匹配任意 xxx{ 或者 xxx[
+        this.regs = regs;
+        return this.regs;
+    },
+    getDomFromJson: function (json) {
+        var regs = this.regs || this.getRegs();
         var setStr = function (name) {
             var str = '';
             if (name) {
@@ -40,8 +47,9 @@ var Editor = {
             }
             return str;
         }
-        var str = json, len = 13, ml = 24, arrlength = 0;
+        var str = json, len = 14, ml = 24, arrlength = 0;
         var domstr = '', inStr = '', a = null, left = 0;
+        this.$divarr = [];
         while (str != '') {
             inStr = '';
             a = null;
@@ -76,6 +84,9 @@ var Editor = {
                             left = arrlength * ml;
                             inStr = '<span class="brackets">' + a[1] + '</span><span class="punctuation">' + a[2] + '</span>';
                             break;
+                        case 14:
+                            inStr = '<span>'+a[0]+'</span>'
+                            break;
                     }
                     break;
                 }
@@ -85,60 +96,102 @@ var Editor = {
                 inStr = str;
             }
             str = str.replace(a[0], '');
-            console.log(a[0])
+            this.$divarr.push(a[0]);
             domstr += '<div class="cmb_edit_div" style=" margin-left: ' + left + 'px">' + inStr + '</div>';
         }
         return domstr;
     },
-    getJsonFromDom: function($divs){
+    getJsonFromDom: function(){
         var str = '';
-        var reg = /<(\w+).+?>(.+?)<\/\1>/;
-        for(var i = 0, len = $divs.length; i < len; i++){
-            var spans = $divs.children('span');
-            for(var j = 0, l = spans.length; j < l; j++){
-                str += spans[i].innerHTML;
+        var reg = /^(.*?)<(\/)?\w+.*?>/;
+        var s = this.$cont.html();
+        while (s){
+            if(a = reg.exec(s)){
+                str += a[1];
+                s = s.replace(a[0],'');
+            }else{
+                str = s;
+                s = '';
             }
         }
         return str;
     },
+    getWrongLine: function(){
+        var json = this.getJsonFromDom();
+        this.getDomFromJson(json);
+        var regs = this.regs || this.getRegs(),last = -1, index= -1;
+        for(var i = 0, len = this.$divarr.length; i < len; i++){
+            var str = this.$divarr[i], a = null;
+            for(var key in regs){
+                if(key == 'reg14'){
+                    break;
+                }else if(a = regs[key].exec(str) || (a = /^("\w+?"):(".*?[^\\]")$/.exec(str))){
+                    if(i>0 && /^(\[|\{)/.test(str) && /[^\b|,|\[|\{]$/.test(this.$divarr[i-1])){
+                        a = null;
+                    }
+                    break;
+                }
+            }
+            if(!a){
+                index = i;
+                break;
+            }
+        }
+        return index;
+    },
     addHandler: function () {
-        var $cont = this.$cont;
         var _self = this;
-        this.$cont.on('keydown', function (e) {
-            _self.doWhenNotEqual()
-        })
-        this.$cont.on('keyup', function (e) {
-            _self.isWrong(e)
-        })
+        this.$cont.on('keyup', this.keyUpFn.bind(this))
+        this.$cont.on('paste', this.pasteFn.bind(this))
     },
     pasteFn: function(e){
-        var $divs = this.$cont.children('div');
-        if($divs.length == 0){
-            var json = this.$cont.html();
-            this.addJson(json);
-        }else{
-            var json = this.getJsonFromDom($divs);
-            this.addJson(json);
+        console.log(e);
+        var self =this;
+        setTimeout(function(){
+            var json = '';
+            json = self.getJsonFromDom()
+            console.log(json)
+            self.addJson(json);
+        },100)
+       
+    },
+    keyUpFn: function(){
+        var line = this.getWrongLine();
+        this.doWhenNotEqual(line);
+    },
+    getFirstLine: function(){
+        var $divs1 = this.$cont.children('div');
+        for(var i = 0, len = $divs1.length; i < len; i++){
+            var html = $divs1[i].innerHTML;
+            html = html.replace(/<(\/)?\w+?>/g,'');
+            if(html){
+                return i;
+            }
         }
+        return 0;
     },
-    isWrong: function(e){
-        console.log('d')
+    doWhenNotEqual: function (line) {
         
-    },
-    doWhenNotEqual: function () {
         var len1 = this.$cont.children('div').length;
         var len2 = this.$numwp.children('div').length;
+        var before = this.getFirstLine();
         if (len1 != len2) {
-            this.setNumWp();
+            this.setNumWp(line + before);
             this.matchHeight();
+        }else{
+            this.setNumWp(line + before);
         }
     },
-    setNumWp: function (len) {
-        len = len || this.$cont.children('div').length;
-        console.log(len)
-        var str = '';
+    setNumWp: function (line) {
+        var len = this.$cont.children('div').length;
+        var str = '',cls='';
         for (var i = 0; i < len; i++) {
-            str += '<div class="cmb_gutter-cell">' + (i + 1) + '</div>'
+            cls='';
+            if(line != -1 && (i >= line || len == i+1)){
+                console.log(i,len, line)
+                cls = 'wrong';
+            }
+            str += '<div class="cmb_gutter-cell '+ cls +'">' + (i + 1) + '</div>';
         }
         this.$numwp.html(str);
     },

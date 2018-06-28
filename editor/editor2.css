@@ -51,9 +51,25 @@
     padding-right: 6px;
     background-repeat: no-repeat;
     margin-bottom: 5px;
+    position: relative;
 }
-
+.cmb_gutter-cell.wrong:after{
+    content: 'x';
+    display: block;
+    color: #fff;
+    position: absolute;
+    background: #a31515;
+    text-align: center;
+    width: 10px;
+    height: 10px;
+    line-height: 10px;
+    font-size: 12px;
+    right: -4px;
+    bottom: 0;
+    border-radius: 5px;
+}
 .cmb_editor_panel {
+    min-height: 500px;
     flex-grow: 1;
     opacity: 1;
     background: #f2f2f2;
