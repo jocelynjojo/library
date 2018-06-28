@@ -205,7 +205,7 @@ Editor.prototype.pasteFn = function (e) {
     setTimeout(function () {
         var json = '';
         json = self.getJsonFromDom()
-        self.addJson(json);
+        self.setCont(json);
     }, 100)
 },
 Editor.prototype.keyUpFn = function () {
