@@ -12,16 +12,9 @@
     overflow-y: auto;
     padding: 0;
     background: #f2f2f2;
-}
-.cmb_editor_cont{
-    width: 100%;
-    display: flex;
-    display: inline-flex;
-    justify-content: center;
-    align-items: flex-start;
     position: relative;
 }
-.cmb_editor_cont::after{
+.cmb_editor::after{
     content: '';
     position: absolute;
     top: 0;
@@ -30,9 +23,20 @@
     background: #fff;
     left: 35px;
 }
-.cmb_gutter {
+.cmb_editor_cont{
+    width: 100%;
+    height: 98%;
+    display: flex;
+    display: inline-flex;
+    justify-content: center;
+    align-items: flex-start;
     position: relative;
-    min-height: 500px;
+    box-sizing: border-box;
+}
+
+.cmb_gutter {
+    height: 100%;
+    position: relative;
     width: auto;
     cursor: default;
     z-index: 4;
@@ -42,6 +46,7 @@
     pointer-events: auto;
     z-index: 1;
     white-space: nowrap;
+    
 }
 
 .cmb_gutter-cell {
@@ -69,7 +74,7 @@
     border-radius: 5px;
 }
 .cmb_editor_panel {
-    min-height: 500px;
+    height: 100%;
     flex-grow: 1;
     opacity: 1;
     background: #f2f2f2;
@@ -78,7 +83,6 @@
     border: none;
     resize: none;
     outline: none;
-    overflow-y: hidden;
     font-size: 12px;
     line-height: 16px;
     padding: 0;
