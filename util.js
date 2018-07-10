@@ -110,4 +110,17 @@ var Cookie = {
     }
 }
 
-
+var util = {
+    /**
+     * 获取url中的query,返回对于的json
+     */
+    getObjFromQuery: function(){
+        var url = location.href;
+        var reg = /(?:\?|&)(.+?)=(.+?)(?=$|&)/g
+        var a = null, obj = {};
+        while(a = reg.exec(url)){
+            obj[a[1]] = a[2];
+        }
+        return obj;
+    }
+}
