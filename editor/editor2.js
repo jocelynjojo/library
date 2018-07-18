@@ -19,7 +19,7 @@ Editor.prototype.setRegs = function () {
     regs.reg5 = /^(?:("\w+?"):)?(\{)/; //匹配 "name"{ 或者 {
     regs.reg6 = /^("\w+?"):("")(,|\]|\})/ //匹配后面跟着(,|\]|\})的 "name":"" 
     regs.reg7 = /^("\w+?"):(".*?[^\\]")(,|\]|\})/ //匹配后面跟着(,|\]|\})的 "name":"value" 其中通过[^\\]" 过滤掉 value 中的"
-    regs.reg8 = /^("\w+?"):(true|false|\d+?)(,|\]|\})/ //匹配后面跟着(,|\]|\})的 "name":value
+    regs.reg8 = /^("\w+?"):(true|false|null|undefined|\d+?)(,|\]|\})/ //匹配后面跟着(,|\]|\})的 "name":value
     regs.reg9 = /^(\}),(\{)/ //匹配 },{
     regs.reg10 = /^(\]),(\[)/ //匹配 ],[
     regs.reg11 = /^(\}\])(,?)/; //匹配 }], 或者 }]
@@ -209,7 +209,19 @@ Editor.prototype.pasteFn = function (e) {
     }, 100)
 },
 Editor.prototype.keyUpFn = function () {
-    this.doFormat();
+    // this.doFormat();
+    var json = json || this.getJsonFromDom();
+    var dom = dom || this.getDomFromJson(json);
+    var line = this.getWrongLine(dom.arr);
+    console.log(line)
+    if(line == -1){
+        // this.$cont.html(dom.str);
+        this.setNumWp(-1);
+    }else{
+        var before = this.getFirstLine();
+        this.setNumWp(line + before);
+    }
+    return line;
 }
 Editor.prototype.getFirstLine = function () {
     var $divs1 = this.$cont.children('div');
