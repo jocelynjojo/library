@@ -14,13 +14,13 @@ Editor.prototype.setRegs = function () {
     var regs = [];
     regs[regs.length] = /^(?:("[^"]+?"):)?(\{\},?)/; //0 匹配 "name":{} 或者 "name":{}, 或者{}
     regs[regs.length] = /^(?:("[^"]+?"):)?(\[\],?)/; //1 匹配 "name":[] 或者 "name":[],或者[]
-    regs[regs.length] = /^(?:("[^"]+?"):)?(\[(?:(?:true|false|null|undefined|\d+?),)*(?:true|false|null|undefined|\d+?)\],?)/; //2 匹配 "name":[] 或者 "name":[],或者[]
+    regs[regs.length] = /^(?:("[^"]+?"):)?(\[(?:(?:true|false|null|undefined|(?:-?\d\.*)+?),)*(?:true|false|null|undefined|(?:-?\d\.*)+?)\],?)/; //2 匹配 "name":[] 或者 "name":[],或者[]
     regs[regs.length] = /^(?:("[^"]+?"):)?(\[\{)/; //3 匹配 "name":[{ 或者 [{
     regs[regs.length] = /^(?:("[^"]+?"):)?(\[)/; //4 匹配 "name":[ 或者 [
     regs[regs.length] = /^(?:("[^"]+?"):)?(\{)/; //5 匹配 "name"{ 或者 {
     regs[regs.length] = /^("[^"]+?"):("")(,|\]|\})/ //6 匹配后面跟着(,|\]|\})的 "name":"" 
     regs[regs.length] = /^("[^"]+?"):(".*?[^\\]")(,|\]|\})/ //7 匹配后面跟着(,|\]|\})的 "name":"value" 其中通过[^\\]" 过滤掉 value 中的"
-    regs[regs.length] = /^("[^"]+?"):(true|false|null|undefined|\d+?)(,|\]|\})/ //8 匹配后面跟着(,|\]|\})的 "name":value
+    regs[regs.length] = /^("[^"]+?"):(true|false|null|undefined|(?:-?\d\.*)+?)(,|\]|\})/ //8 匹配后面跟着(,|\]|\})的 "name":value
     regs[regs.length] = /^(".*?[^\\]")(,|\]|\})/ //9 匹配后面跟着(,|\]|\})的 "value" 其中通过[^\\]" 过滤掉 value 中的"
     regs[regs.length] = /^(\}),(\{)/ //11 匹配 },{
     regs[regs.length] = /^(\]),(\[)/ //12 匹配 ],[
@@ -34,7 +34,7 @@ Editor.prototype.setRegs2 = function () {
     var regs = this.setRegs();
     regs[6] = /^("[^"]+?"):("")(,?)/ //匹配后面跟着(,|\]|\})的 "name":"" 
     regs[7] = /^("[^"]+?"):(".*?[^\\]")(,?)/ //匹配后面跟着(,|\]|\})的 "name":"value" 其中通过[^\\]" 过滤掉 value 中的"
-    regs[8] = /^("[^"]+?"):(true|false|null|undefined|\d+)(,?)/ //匹配后面跟着(,|\]|\})的 "name":value
+    regs[8] = /^("[^"]+?"):(true|false|null|undefined|(?:-?\d\.*)+)(,?)/ //匹配后面跟着(,|\]|\})的 "name":value
     regs[9] = /^(".*?[^\\]")(,?)/ //匹配后面跟着(,|\]|\})的 "name":value
     return regs;
 }
@@ -43,12 +43,14 @@ Editor.prototype.setRegs2 = function () {
  * @param {string} json 
  */
 Editor.prototype.setCont = function (json) {
+    json = json.replace(/&nbsp;/g,'');
     if (json) {
         var dom = this.getDomFromJson(json);
         this.$cont.html(dom.str);
         this.doFormat(json, dom);
     }
 }
+
 /**
  * 已经存在的情况并且格式化的情况下，
  */
@@ -73,15 +75,16 @@ Editor.prototype.doFormat = function (json, dom) {
 Editor.prototype.getWrongLine = function (arr) {
     var regs = this.regexps2, index = -1;
     for (var i = 0, len = arr.length; i < len; i++) {
+        arr[i] = arr[i].replace(/&nbsp;/g,'').replace(/\s/g,'');
         var str = arr[i], a = null;
-        if (!str || /^\s+$/.test(str)) {
+        if (!str) {
             continue;
         }
         for (var j = 0, _len = regs.length; j < _len; j++) {
             if (j == regs.length - 1) {
                 break;
             } else if (a = regs[j].exec(str)) {
-                if (i > 0 && /^(\[|\{|")/.test(str) && /[^\b|,|\[|\{]$/.test(arr[i - 1]) || str.replace(a[0], '')) {
+                if (i > 0 && /^(\[|\{|")/.test(str) && /[^\b|,|\[|\{]$/.test(arr[i - 1].replace(/\s/g, '').replace(/&nbsp;/g, '')) || str.replace(a[0], '')) {
                     a = null;
                 }
                 break;
@@ -109,6 +112,7 @@ Editor.prototype.getDomFromJson = function (json) {
         return str;
     }
     var changeStr = function (val) {
+        val = val.replace(/&nbsp;/g,'');
         return val.replace('<', '&lt;').replace('>', '&gt;');
     }
     var str = changeStr(json), ml = 24, arrlength = 0;
@@ -116,6 +120,7 @@ Editor.prototype.getDomFromJson = function (json) {
     var divarr = [];
     var regs = this.regexps;
     while (str != '') {
+        str = str.replace(/\s+(?=(?:\:|\"|$|,|\}|\{|\]|\[))/g,'').replace(/(?:\:)\s+/,':');
         inStr = '';
         a = null;
         for (var i = 1, len = regs.length; i < len; i++) {
@@ -150,7 +155,7 @@ Editor.prototype.getDomFromJson = function (json) {
                         if (a[3] == ',') {
                             inStr += '<span class="punctuation">,</span>';
                         } else {
-                            a[0] = a[0].replace(a[3], '');
+                            a[0] = a[0].replace(new RegExp(a[3] + '$'), '');
                         }
                         break;
                     case 9:
@@ -158,7 +163,7 @@ Editor.prototype.getDomFromJson = function (json) {
                         if (a[2] == ',') {
                             inStr += '<span class="punctuation">,</span>';
                         } else {
-                            a[0] = a[0].replace(a[2], '');
+                            a[0] = a[0] = a[0].replace(new RegExp(a[2] + '$'), '');
                         }
                         break;
                     case 10: case 11:
@@ -181,8 +186,23 @@ Editor.prototype.getDomFromJson = function (json) {
             a = [str];
             inStr = str;
         }
+        // var headindex = str.indexOf(a[0])
+        // var lastindex = str.lastIndexOf(a[0]);
+        // str = str.substring(headindex,lastindex)
+        // if(str.indexOf(a[0]) < 0 && regs[i]){
+        //     str = str.replace(regs[i],'')
+        // }else{
+        //     str = str.replace(a[0], '');
+        // }
+        var ostr = str;
         str = str.replace(a[0], '');
-        divarr.push(a[0]);
+        if(ostr == str && regs[i]){
+            str = str.replace(regs[i],'');
+        }
+        
+        if(/\S/.test(a[0])){
+            divarr.push(a[0]);
+        }
         domstr += '<div class="cmb_edit_div" style=" margin-left: ' + left + 'px">' + inStr + '</div>';
     }
     return { str: domstr, arr: divarr };
@@ -249,7 +269,7 @@ Editor.prototype.setNumWp = function (line) {
     }
     for (var i = 0; i < len; i++) {
         cls = '';
-        if (line != -1 && (i >= line || len == i + 1)) {
+        if (line != -1 && (i == line || len == i + 1)) {
             cls = 'wrong';
         }
         str += '<div class="cmb_gutter-cell ' + cls + '">' + (i + 1) + '</div>';
